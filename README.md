@@ -10,6 +10,7 @@ A simple command-line interface for basic file system operations with advanced f
 - Create empty files (create)
 - Copy files or directories (copy)
 - Rename files or directories (rename/mv)
+- Move files or directories (move)
 - View file contents (view/cat, first 1KB)
 - Search files (search, optional recursive)
 - View file permissions (perms)
@@ -38,6 +39,7 @@ A simple command-line interface for basic file system operations with advanced f
 - `create <name>`: Create new empty file
 - `copy <source> <dest>`: Copy file or directory
 - `rename` or `mv <old> <new>`: Rename file or directory
+- `move <source> <dest>`: Move file or directory
 - `view` or `cat <name>`: View file contents (first 1KB)
 - `search <pattern> [r]`: Search files (add 'r' for recursive)
 - `perms <name>`: View file permissions (Unix-style)
