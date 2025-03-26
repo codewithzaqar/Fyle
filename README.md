@@ -19,6 +19,7 @@ A simple command-line interface for basic file system operations with advanced f
 - Error logging (logs/cli.log)
 - Configuration file support (config.json)
 - Command aliases
+- Autocomplete suggestions
 - Help system
 
 ## Requirements
