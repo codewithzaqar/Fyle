@@ -25,3 +25,11 @@
 2025-03-26 15:20:48,007 - ERROR - Failed to load/validate config: Missing config keys: {'min_size', 'max_size'}
 2025-03-26 15:21:27,898 - INFO - Configuration loaded successfully
 2025-03-26 15:21:27,899 - ERROR - Failed to load/validate config: Missing config keys: {'max_size', 'min_size'}
+2025-03-26 15:51:55,737 - INFO - Configuration loaded successfully
+2025-03-26 15:51:55,737 - INFO - Configuration validated successfully
+2025-03-26 15:52:04,138 - INFO - Created file: file.txt
+2025-03-26 15:52:22,554 - ERROR - Failed to move file.txt to /logs: [Errno 13] Permission denied: 'C:\\logs'
+2025-03-26 15:52:27,731 - INFO - Moved file.txt to logs/
+2025-03-26 15:52:52,142 - INFO - Deleted: file.txt
+2025-03-26 15:53:09,865 - INFO - Changed directory to: C:\Users\hakob\Docs\Projects\cli\Fyle\logs
+2025-03-26 15:53:15,201 - INFO - Deleted: file.txt

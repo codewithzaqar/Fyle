@@ -16,16 +16,19 @@ def main():
     try:
         config = load_config('config.json')
         validate_config(config)
+        logging.info("Configuration validated successfully")
     except Exception as e:
-        logging.error(f"Failed to load/validate config: {str(e)}")
+        logging.error(f"Configuration error: {str(e)}")
+        print(f"Warning: Configuration error - using defaults: {str(e)}")
         config = {
-            "version": "0.07",
+            "version": "0.08",
             "prompt": "FyleCLI> ",
             "max_history": 100,
             "search_recursive": False,
             "default_sort": "name",
             "min_size": 0,
             "max_size": None,
+            "autocomplete": True,
             "aliases": {
                 "ls": "dir",
                 "rm": "del",

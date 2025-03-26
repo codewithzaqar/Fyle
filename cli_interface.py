@@ -1,11 +1,17 @@
 from datetime import datetime
+from utils import suggest_commands
 
 class CLIInterface:
     def __init__(self, file_manager, config):
         self.file_manager = file_manager
         self.config = config
         self.running = False
-        self.history = []  # Now stores tuples of (timestamp, command)
+        self.history = [] # (timestamp, command)
+        self.commands = [
+            "dir", "ls", "cd", "pwd", "del", "rm", 'create', "copy",
+            "rename", "mv", "move", "view", "cat", "search", "perms",
+            "edit", "history", "help", "exit"
+        ]
 
     def display_help(self):
         print("\nCommands:")
@@ -16,6 +22,7 @@ class CLIInterface:
         print("  create <name> - Create new empty file")
         print("  copy <source> <dest> - Copy file or directory")
         print("  rename/mv <old> <new> - Rename file or directory")
+        print("  move <source> <dest> - Move file or directory")
         print("  view/cat <name> - View file contents (first 1KB)")
         print("  search <pattern> [r] - Search files(optional: r for recursive)")
         print("  perms <name> - View file permissions")
@@ -36,7 +43,7 @@ class CLIInterface:
             _  __/   _  /_/ /_  / /  __/
             /_/      _\__, / /_/  \___/ 
                      /____/              
-            Type 'help' for commands  v0.07""")
+            Type 'help' for commands  v0.08""")
         
         while self.running:
             try:
@@ -89,6 +96,12 @@ class CLIInterface:
                         print(f"Renamed {command[1]} to {command[2]}")
                     else:
                         print(f"Error: {result}")
+                elif cmd == "move" and len(command) > 2:
+                    result = self.file_manager.move_file(command[1], command[2])
+                    if result is True:
+                        print(f"Moved {command[1]} to {command[2]}")
+                    else:
+                        print(f"Error: {result}")
                 elif cmd in ["view", "cat"] and len(command) > 1:
                     result = self.file_manager.read_file(command[1])
                     if isinstance(result, str) and not result.startswith("Error"):
@@ -122,6 +135,13 @@ class CLIInterface:
                 elif cmd == "help":
                     self.display_help()
                 else:
-                    print("Unknown command. Type 'help' for available commands")
+                    if self.config["autocomplete"]:
+                        suggestions = suggest_commands(cmd, self.commands + list(self.config["aliases"].keys()))
+                        if suggestions:
+                            print(f"Unknown command. Did you mean: {', '.join(suggestions)}?")
+                        else:
+                            print("Unknown command. Type 'help' for available commands")
+                    else:
+                        print("Unknown command. Type 'help' for available commands")
             except Exception as e:
                 print(f"Error: {str(e)}")

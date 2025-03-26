@@ -3,6 +3,7 @@ import json
 from datetime import datetime
 import logging
 import stat
+from difflib import get_close_matches
 
 def get_file_info(path):
     try:
@@ -33,7 +34,7 @@ def load_config(config_file):
         raise Exception(f"Failed to load configuration: {str(e)}")
 
 def validate_config(config):
-    required = {"version", "prompt", "max_history", "search_recursive", "default_sort", "aliases", "min_size", "max_size"}
+    required = {"version", "prompt", "max_history", "search_recursive", "default_sort", "aliases", "min_size", "max_size", "autocomplete"}
     missing = required - set(config.keys())
     if missing:
         raise Exception(f"Missing config keys: {missing}")
@@ -43,6 +44,8 @@ def validate_config(config):
         raise Exception(f"Invalid min_size value: {config['min_size']}")
     if config["max_size"] is not None and not isinstance(config["max_size"], (int, str)) or (isinstance(config["max_size"], str) and not config["max_size"].isdigit()):
         raise Exception(f"Invalid max_size value: {config['max_size']}")
+    if not isinstance(config["autocomplete"], bool):
+        raise Exception(f"Invalid autocomplete value: {config['autocomplete']}")
 
 def get_permissions(path):
     try:
@@ -72,3 +75,6 @@ def size_to_bytes(size):
     if size[-1] in units:
         return int(size[:-1]) * units[size[-1]]
     return int(size)
+
+def suggest_commands(input_cmd, available_commands):
+    return get_close_matches(input_cmd, available_commands, n=3, cutoff=0.6)

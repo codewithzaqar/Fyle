@@ -97,6 +97,17 @@ class FileManager:
         except Exception as e:
             logging.error(f"Failed to rename {old_name} to {new_name}: {str(e)}")
             raise Exception(f"Rename failed: {str(e)}")
+        
+    def move_file(self, source, destination):
+        try:
+            src_path = os.path.join(self.current_dir, source)
+            dest_path = os.path.abspath(destination)  # Support absolute paths
+            shutil.move(src_path, dest_path)
+            logging.info(f"Moved {source} to {destination}")
+            return True
+        except Exception as e:
+            logging.error(f"Failed to move {source} to {destination}: {str(e)}")
+            raise Exception(f"Move failed: {str(e)}")
 
     def read_file(self, filename):
         try:
