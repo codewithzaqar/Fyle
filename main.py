@@ -1,10 +1,17 @@
+import logging
 from cli_interface import CLIInterface
 from file_manager import FileManager
 
 def main():
-    # Basic configuration
+    # Configure logging
+    logging.basicConfig(
+        filename='logs/cli.log',
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s'
+    )
+
     config = {
-        "version": "0.02",
+        "version": "0.03",
         "prompt": "FyleCLI> "
     }
 

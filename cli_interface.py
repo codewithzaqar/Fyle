@@ -11,6 +11,8 @@ class CLIInterface:
         print("  cd <path> - Change directory")
         print("  pwd - Show current directory")
         print("  del/rm <name> - Delete file or directory")
+        print("  create <name> - Create new empty file")
+        print("  copy <source> <dest> - Copy file or directory")
         print("  history - Show command history")
         print("  exit - Quit the program")
         print("  help - Show this message")
@@ -23,8 +25,8 @@ class CLIInterface:
             __  /_   __  / / /_  /_  _ \ 
             _  __/   _  /_/ /_  / /  __/
             /_/      _\__, / /_/  \___/ 
-                    /____/              
-            Type 'help' for commands  v0.02""")
+                     /____/              
+            Type 'help' for commands  v0.03""")
         
         while self.running:
             command = input(f"\n{self.config['prompt']}").strip().split()
@@ -52,6 +54,18 @@ class CLIInterface:
                     print(f"Deleted: {command[1]}")
                 else:
                     print(f"Error: {result}")
+            elif cmd == "create" and len(command) > 1:
+                result = self.file_manager.create_file(command[1])
+                if result is True:
+                    print(f"Created: {command[1]}")
+                else:
+                    print(f"Error: {result}")
+            elif cmd == "copy" and len(command) > 2:
+                result = self.file_manager.copy_file(command[1], command[2])
+                if result is True:
+                    print(f"Copied {command[1]} to {command[2]}")
+                else:
+                    print(f"Error: {result}")        
             elif cmd == "history":
                 for i, cmd in enumerate(self.history, 1):
                     print(f"{i}. {cmd}")
