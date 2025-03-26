@@ -1,11 +1,33 @@
 import os
 import shutil
+import json
 import logging
 from utils import get_file_info, get_permissions, size_to_bytes
 
 class FileManager:
     def __init__(self):
         self.current_dir = os.getcwd()
+        self.tags_file = 'tags.json'
+        self.load_tags()
+
+    def load_tags(self):
+        try:
+            if os.path.exists(self.tags_file):
+                with open(self.tags_file, 'r') as f:
+                    self.tags = json.load(f)
+            else:
+                self.tags = {}
+        except Exception as e:
+            logging.error(f"Failed to load tags: {str(e)}")
+            self.tags = {}
+
+    def save_tags(self):
+        try:
+            with open(self.tags_file, 'w') as f:
+                json.dump(self.tags, f, indent=2)
+            logging.debug("Tags saved successfully")
+        except Exception as e:
+            logging.error(f"Failed to save tags: {str(e)}")
 
     def list_files(self, detailed=False, sort_by="name", min_size=0, max_size=None):
         try:
@@ -54,6 +76,9 @@ class FileManager:
                 os.remove(full_path)
             elif os.path.isdir(full_path):
                 shutil.rmtree(full_path)
+            if full_path in self.tags:
+                del self.tags[full_path]
+                self.save_tags()
             logging.info(f"Deleted: {filename}")
             return True
         except Exception as e:
@@ -89,6 +114,9 @@ class FileManager:
                 shutil.copytree(src_path, dest_path)
             else:
                 shutil.copy2(src_path, dest_path)
+            if src_path in self.tags:
+                self.tags[dest_path] = self.tags[src_path]
+                self.save_tags()
             logging.info(f"Copied {source} to {destination}")
             return True
         except Exception as e:
@@ -110,6 +138,9 @@ class FileManager:
             old_path = os.path.join(self.current_dir, old_name)
             new_path = os.path.join(self.current_dir, new_name)
             os.rename(old_path, new_path)
+            if old_path in self.tags:
+                self.tags[new_path] = self.tags.pop(old_path)
+                self.save_tags()
             logging.info(f"Renamed {old_name} to {new_name}")
             return True
         except Exception as e:
@@ -121,6 +152,9 @@ class FileManager:
             src_path = os.path.join(self.current_dir, source)
             dest_path = os.path.abspath(destination)
             shutil.move(src_path, dest_path)
+            if src_path in self.tags:
+                self.tags[dest_path] = self.tags.pop(src_path)
+                self.save_tags()
             logging.info(f"Moved {source} to {destination}")
             return True
         except Exception as e:
@@ -189,3 +223,41 @@ class FileManager:
         except Exception as e:
             logging.error(f"Failed to edit {filename}: {str(e)}")
             raise Exception(f"Edit failed: {str(e)}")
+
+    def add_tag(self, filename, tag):
+        try:
+            full_path = os.path.join(self.current_dir, filename)
+            if full_path not in self.tags:
+                self.tags[full_path] = []
+            if tag not in self.tags[full_path]:
+                self.tags[full_path].append(tag)
+                self.save_tags()
+            logging.info(f"Added tag '{tag}' to {filename}")
+            return True
+        except Exception as e:
+            logging.error(f"Failed to add tag to {filename}: {str(e)}")
+            raise Exception(f"Tag add failed: {str(e)}")
+
+    def remove_tag(self, filename, tag):
+        try:
+            full_path = os.path.join(self.current_dir, filename)
+            if full_path in self.tags and tag in self.tags[full_path]:
+                self.tags[full_path].remove(tag)
+                if not self.tags[full_path]:
+                    del self.tags[full_path]
+                self.save_tags()
+            logging.info(f"Removed tag '{tag}' from {filename}")
+            return True
+        except Exception as e:
+            logging.error(f"Failed to remove tag from {filename}: {str(e)}")
+            raise Exception(f"Tag remove failed: {str(e)}")
+
+    def get_tags(self, filename):
+        try:
+            full_path = os.path.join(self.current_dir, filename)
+            tags = self.tags.get(full_path, [])
+            logging.debug(f"Retrieved tags for {filename}: {tags}")
+            return tags
+        except Exception as e:
+            logging.error(f"Failed to get tags for {filename}: {str(e)}")
+            raise Exception(f"Tag get failed: {str(e)}")

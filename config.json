@@ -1,5 +1,5 @@
 {
-    "version": "0.09",
+    "version": "0.10",
     "prompt": "FyleCLI> ",
     "max_history": 100,
     "search_recursive": false,
@@ -9,6 +9,8 @@
     "autocomplete": true,
     "log_level": "INFO",
     "batch_enabled": true,
+    "tags_enabled": true,
+    "script_dir": "scripts",
     "aliases": {
         "ls": "dir",
         "rm": "del",

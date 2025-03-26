@@ -1,5 +1,6 @@
+import os
 from datetime import datetime
-from utils import suggest_commands
+from utils import suggest_commands, run_script
 
 class CLIInterface:
     def __init__(self, file_manager, config):
@@ -10,7 +11,8 @@ class CLIInterface:
         self.commands = [
             "dir", "ls", "cd", "pwd", "del", "rm", 'create', "copy",
             "rename", "mv", "move", "view", "cat", "search", "perms",
-            "edit", "history", "help", "exit", "batch_del", "batch_copy", "batch_move", "exec"
+            "edit", "history", "help", "exit", "batch_del", "batch_copy",
+            "batch_move", "exec", "tag", "untag", "tags", "script"
         ]
 
     def display_help(self):
@@ -27,16 +29,24 @@ class CLIInterface:
         print("  move <source> <dest> - Move file or directory")
         print("  batch_move <source1> <source2> ... <dest> - Batch move files")
         print("  view/cat <name> - View file contents (first 1KB)")
-        print("  search <pattern> [r] - Search files(optional: r for recursive)")
+        print("  search <pattern> [r] - Search files (r for recursive)")
         print("  perms <name> - View file permissions")
         print("  edit <name> <content> - Append text to file")
-        print("  history - Show command history")
+        print("  tag <name> <tag> - Add tag to file")
+        print("  untag <name> <tag> - Remove tag from file")
+        print("  tags <name> - Show tags for file")
+        print("  history - Show command history with timestamps")
         print("  exec <number> - Execute command from history")
+        print("  script <filename> - Run commands from script file")
         print("  exit - Quit the program")
         print("  help - Show this message")
 
     def resolve_alias(self, cmd):
         return self.config.get("aliases", {}).get(cmd, cmd)
+    
+    def trim_history(self):
+        if len(self.history) > self.config["max_history"]:
+            self.history = self.history[-self.config["max_history"]:]
 
     def run(self):
         self.running = True
@@ -47,7 +57,7 @@ class CLIInterface:
             _  __/   _  /_/ /_  / /  __/
             /_/      _\__, / /_/  \___/ 
                      /____/              
-            Type 'help' for commands  v0.09""")
+            Type 'help' for commands  v0.10""")
         
         while self.running:
             try:
@@ -58,6 +68,7 @@ class CLIInterface:
                 cmd = self.resolve_alias(command[0].lower())
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 self.history.append((timestamp, " ".join(command)))
+                self.trim_history()
                 
                 if cmd in ["exit", "quit"]:
                     self.running = False
@@ -149,6 +160,24 @@ class CLIInterface:
                         print(f"Appended to {command[1]}")
                     else:
                         print(f"Error: {result}")
+                elif cmd == "tag" and len(command) > 2 and self.config["tags_enabled"]:
+                    result = self.file_manager.add_tag(command[1], command[2])
+                    if result is True:
+                        print(f"Tagged {command[1]} with '{command[2]}'")
+                    else:
+                        print(f"Error: {result}")
+                elif cmd == "untag" and len(command) > 2 and self.config["tags_enabled"]:
+                    result = self.file_manager.remove_tag(command[1], command[2])
+                    if result is True:
+                        print(f"Removed tag '{command[2]}' from {command[1]}")
+                    else:
+                        print(f"Error: {result}")
+                elif cmd == "tags" and len(command) > 1 and self.config["tags_enabled"]:
+                    tags = self.file_manager.get_tags(command[1])
+                    if isinstance(tags, list):
+                        print(f"Tags for {command[1]}: {', '.join(tags) if tags else 'None'}")
+                    else:
+                        print(f"Error: {tags}")
                 elif cmd == "history":
                     for i, (ts, cmd) in enumerate(self.history, 1):
                         print(f"{i}. [{ts}] {cmd}")
@@ -159,12 +188,19 @@ class CLIInterface:
                             _, old_cmd = self.history[index]
                             print(f"Executing: {old_cmd}")
                             self.history.append((datetime.now().strftime("%Y-%m-%d %H:%M:%S"), old_cmd))
-                            # Re-run the command by splitting and processing it
+                            self.trim_history()
                             self.run_command(old_cmd.split())
                         else:
                             print("Invalid history index")
                     except ValueError:
                         print("Invalid index - use a number")
+                elif cmd == "script" and len(command) > 1:
+                    script_path = os.path.join(self.config["script_dir"], command[1])
+                    result = run_script(script_path, self)
+                    if result is True:
+                        print(f"Executed script: {command[1]}")
+                    else:
+                        print(f"Error: {result}")
                 elif cmd == "help":
                     self.display_help()
                 else:
@@ -178,9 +214,8 @@ class CLIInterface:
                         print("Unknown command. Type 'help' for available commands")
             except Exception as e:
                 print(f"Error: {str(e)}")
-            
+
     def run_command(self, command):
-        # Recursive method to handle exec command
         cmd = self.resolve_alias(command[0].lower())
         if cmd in ["dir", "ls"]:
             detailed = len(command) > 1 and command[1].lower() == "detail"
@@ -191,5 +226,4 @@ class CLIInterface:
                 sort_by = self.config["default_sort"]
             files = self.file_manager.list_files(detailed, sort_by, min_size, max_size)
             print("\n".join(str(f) for f in files))
-        # Add other commands as needed for exec functionality
-        # For simplicity, only dir/ls is implemented here
+        # Add other commands as needed for exec/script functionality

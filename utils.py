@@ -34,7 +34,9 @@ def load_config(config_file):
         raise Exception(f"Failed to load configuration: {str(e)}")
 
 def validate_config(config):
-    required = {"version", "prompt", "max_history", "search_recursive", "default_sort", "aliases", "min_size", "max_size", "autocomplete", "log_level", "batch_enabled"}
+    required = {"version", "prompt", "max_history", "search_recursive", "default_sort", 
+                "min_size", "max_size", "aliases", "autocomplete", "log_level", 
+                "batch_enabled", "tags_enabled", "script_dir"}
     missing = required - set(config.keys())
     if missing:
         raise Exception(f"Missing config keys: {missing}")
@@ -42,7 +44,7 @@ def validate_config(config):
         raise Exception(f"Invalid default_sort value: {config['default_sort']}")
     if not isinstance(config["min_size"], (int, str)) or (isinstance(config["min_size"], str) and not config["min_size"].isdigit()):
         raise Exception(f"Invalid min_size value: {config['min_size']}")
-    if config["max_size"] is not None and not isinstance(config["max_size"], (int, str)) or (isinstance(config["max_size"], str) and not config["max_size"].isdigit()):
+    if config["max_size"] is not None and not isinstance(config["max_size"], (int, str)) or (isinstance(config["max_size"], str) and not config["min_size"].isdigit()):
         raise Exception(f"Invalid max_size value: {config['max_size']}")
     if not isinstance(config["autocomplete"], bool):
         raise Exception(f"Invalid autocomplete value: {config['autocomplete']}")
@@ -50,7 +52,11 @@ def validate_config(config):
         raise Exception(f"Invalid log_level value: {config['log_level']}")
     if not isinstance(config["batch_enabled"], bool):
         raise Exception(f"Invalid batch_enabled value: {config['batch_enabled']}")
-    
+    if not isinstance(config["tags_enabled"], bool):
+        raise Exception(f"Invalid tags_enabled value: {config['tags_enabled']}")
+    if not isinstance(config["script_dir"], str):
+        raise Exception(f"Invalid script_dir value: {config['script_dir']}")
+
 def setup_logging(log_file, log_level):
     level_map = {
         "DEBUG": logging.DEBUG,
@@ -58,7 +64,7 @@ def setup_logging(log_file, log_level):
         "WARNING": logging.WARNING,
         "ERROR": logging.ERROR,
         "CRITICAL": logging.CRITICAL
-    }    
+    }
     logging.basicConfig(
         filename=log_file,
         level=level_map.get(log_level, logging.INFO),
@@ -96,3 +102,16 @@ def size_to_bytes(size):
 
 def suggest_commands(input_cmd, available_commands):
     return get_close_matches(input_cmd, available_commands, n=3, cutoff=0.6)
+
+def run_script(script_path, cli):
+    if not os.path.exists(script_path):
+        return f"Script file not found: {script_path}"
+    try:
+        with open(script_path, 'r') as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith('#'):  # Skip empty lines and comments
+                    cli.run_command(line.split())
+        return True
+    except Exception as e:
+        return f"Failed to run script: {str(e)}"
