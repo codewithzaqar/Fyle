@@ -12,21 +12,25 @@ def main():
         format='%(asctime)s - %(levelname)s - %(message)s'
     )
     
-    # Load configuration
+    # Load and validate configuration
     try:
         config = load_config('config.json')
         validate_config(config)
     except Exception as e:
         logging.error(f"Failed to load/validate config: {str(e)}")
         config = {
-            "version": "0.06",
+            "version": "0.07",
             "prompt": "FyleCLI> ",
             "max_history": 100,
             "search_recursive": False,
             "default_sort": "name",
+            "min_size": 0,
+            "max_size": None,
             "aliases": {
                 "ls": "dir",
-                "rm": "del"
+                "rm": "del",
+                "mv": "rename",
+                "cat": "view"
             }
         }
 

@@ -19,3 +19,9 @@
 2025-03-26 14:43:17,121 - INFO - Configuration loaded successfully
 2025-03-26 14:43:23,737 - INFO - Deleted: test1.txt
 2025-03-26 14:43:58,905 - INFO - Configuration loaded successfully
+2025-03-26 15:18:45,380 - INFO - Configuration loaded successfully
+2025-03-26 15:18:45,381 - ERROR - Failed to load/validate config: Missing config keys: {'max_size', 'min_size'}
+2025-03-26 15:20:48,007 - INFO - Configuration loaded successfully
+2025-03-26 15:20:48,007 - ERROR - Failed to load/validate config: Missing config keys: {'min_size', 'max_size'}
+2025-03-26 15:21:27,898 - INFO - Configuration loaded successfully
+2025-03-26 15:21:27,899 - ERROR - Failed to load/validate config: Missing config keys: {'max_size', 'min_size'}

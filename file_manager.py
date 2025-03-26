@@ -1,29 +1,39 @@
 import os
 import shutil
 import logging
-from utils import get_file_info, get_permissions
+from utils import get_file_info, get_permissions, size_to_bytes
 
 class FileManager:
     def __init__(self):
         self.current_dir = os.getcwd()
 
-    def list_files(self, detailed=False, sort_by="name"):
+    def list_files(self, detailed=False, sort_by="name", min_size=0, max_size=None):
         try:
             files = os.listdir(self.current_dir)
             full_paths = [os.path.join(self.current_dir, f) for f in files]
-
+            
+            # Filter by size
+            filtered_paths = []
+            for path in full_paths:
+                size = os.path.getsize(path)
+                min_size_bytes = size_to_bytes(min_size)
+                max_size_bytes = size_to_bytes(max_size) if max_size else float('inf')
+                if min_size_bytes <= size <= max_size_bytes:
+                    filtered_paths.append(path)
+            
+            # Sort
             if sort_by == "mtime":
-                full_paths.sort(key=lambda x: os.path.getmtime(x))
+                filtered_paths.sort(key=lambda x: os.path.getmtime(x))
             else:  # Default to name sorting
-                full_paths.sort()
-
-            files = [os.path.basename(p) for p in full_paths]
+                filtered_paths.sort()
+                
+            files = [os.path.basename(p) for p in filtered_paths]
             if detailed:
-                return [get_file_info(p) for p in full_paths]
+                return [get_file_info(p) for p in filtered_paths]
             return files
         except Exception as e:
             logging.error(f"Failed to list files: {str(e)}")
-            return str(e)
+            raise Exception(f"List operation failed: {str(e)}")
 
     def change_dir(self, path):
         try:
@@ -34,11 +44,11 @@ class FileManager:
             return True
         except Exception as e:
             logging.error(f"Failed to change directory: {str(e)}")
-            return str(e)
+            raise Exception(f"Directory change failed: {str(e)}")
 
     def get_current_dir(self):
         return self.current_dir
-    
+
     def delete_file(self, filename):
         try:
             full_path = os.path.join(self.current_dir, filename)
@@ -50,7 +60,7 @@ class FileManager:
             return True
         except Exception as e:
             logging.error(f"Failed to delete {filename}: {str(e)}")
-            return str(e)
+            raise Exception(f"Delete failed: {str(e)}")
 
     def create_file(self, filename):
         try:
@@ -61,8 +71,8 @@ class FileManager:
             return True
         except Exception as e:
             logging.error(f"Failed to create {filename}: {str(e)}")
-            return str(e)
-        
+            raise Exception(f"Create failed: {str(e)}")
+
     def copy_file(self, source, destination):
         try:
             src_path = os.path.join(self.current_dir, source)
@@ -75,8 +85,8 @@ class FileManager:
             return True
         except Exception as e:
             logging.error(f"Failed to copy {source} to {destination}: {str(e)}")
-            return str(e)
-        
+            raise Exception(f"Copy failed: {str(e)}")
+
     def rename_file(self, old_name, new_name):
         try:
             old_path = os.path.join(self.current_dir, old_name)
@@ -86,8 +96,8 @@ class FileManager:
             return True
         except Exception as e:
             logging.error(f"Failed to rename {old_name} to {new_name}: {str(e)}")
-            return str(e)
-        
+            raise Exception(f"Rename failed: {str(e)}")
+
     def read_file(self, filename):
         try:
             full_path = os.path.join(self.current_dir, filename)
@@ -97,13 +107,13 @@ class FileManager:
             return content
         except Exception as e:
             logging.error(f"Failed to read {filename}: {str(e)}")
-            return str(e)
-        
+            raise Exception(f"Read failed: {str(e)}")
+
     def search_files(self, pattern, recursive=False):
         try:
             matches = []
             search_dir = self.current_dir
-
+            
             if recursive:
                 for root, _, files in os.walk(search_dir):
                     for f in files:
@@ -113,13 +123,13 @@ class FileManager:
                 for f in os.listdir(search_dir):
                     if pattern.lower() in f.lower():
                         matches.append(f)
-
+            
             logging.info(f"Searched for '{pattern}' - found {len(matches)} matches")
             return matches
         except Exception as e:
             logging.error(f"Search failed: {str(e)}")
-            return str(e)
-        
+            raise Exception(f"Search failed: {str(e)}")
+
     def get_file_permissions(self, filename):
         try:
             full_path = os.path.join(self.current_dir, filename)
@@ -128,8 +138,8 @@ class FileManager:
             return perms
         except Exception as e:
             logging.error(f"Failed to get permissions for {filename}: {str(e)}")
-            return str(e)
-        
+            raise Exception(f"Permissions check failed: {str(e)}")
+
     def edit_file(self, filename, content):
         try:
             full_path = os.path.join(self.current_dir, filename)
@@ -139,4 +149,4 @@ class FileManager:
             return True
         except Exception as e:
             logging.error(f"Failed to edit {filename}: {str(e)}")
-            return str(e)
+            raise Exception(f"Edit failed: {str(e)}")
