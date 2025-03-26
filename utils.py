@@ -34,7 +34,7 @@ def load_config(config_file):
         raise Exception(f"Failed to load configuration: {str(e)}")
 
 def validate_config(config):
-    required = {"version", "prompt", "max_history", "search_recursive", "default_sort", "aliases", "min_size", "max_size", "autocomplete"}
+    required = {"version", "prompt", "max_history", "search_recursive", "default_sort", "aliases", "min_size", "max_size", "autocomplete", "log_level", "batch_enabled"}
     missing = required - set(config.keys())
     if missing:
         raise Exception(f"Missing config keys: {missing}")
@@ -46,6 +46,24 @@ def validate_config(config):
         raise Exception(f"Invalid max_size value: {config['max_size']}")
     if not isinstance(config["autocomplete"], bool):
         raise Exception(f"Invalid autocomplete value: {config['autocomplete']}")
+    if config["log_level"] not in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
+        raise Exception(f"Invalid log_level value: {config['log_level']}")
+    if not isinstance(config["batch_enabled"], bool):
+        raise Exception(f"Invalid batch_enabled value: {config['batch_enabled']}")
+    
+def setup_logging(log_file, log_level):
+    level_map = {
+        "DEBUG": logging.DEBUG,
+        "INFO": logging.INFO,
+        "WARNING": logging.WARNING,
+        "ERROR": logging.ERROR,
+        "CRITICAL": logging.CRITICAL
+    }    
+    logging.basicConfig(
+        filename=log_file,
+        level=level_map.get(log_level, logging.INFO),
+        format='%(asctime)s - %(levelname)s - %(message)s'
+    )
 
 def get_permissions(path):
     try:

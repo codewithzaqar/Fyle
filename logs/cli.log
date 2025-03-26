@@ -33,3 +33,5 @@
 2025-03-26 15:52:52,142 - INFO - Deleted: file.txt
 2025-03-26 15:53:09,865 - INFO - Changed directory to: C:\Users\hakob\Docs\Projects\cli\Fyle\logs
 2025-03-26 15:53:15,201 - INFO - Deleted: file.txt
+2025-03-26 15:59:08,945 - INFO - Configuration loaded successfully
+2025-03-26 15:59:08,946 - INFO - Configuration validated successfully

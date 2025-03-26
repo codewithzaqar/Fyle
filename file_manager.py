@@ -12,7 +12,6 @@ class FileManager:
             files = os.listdir(self.current_dir)
             full_paths = [os.path.join(self.current_dir, f) for f in files]
             
-            # Filter by size
             filtered_paths = []
             for path in full_paths:
                 size = os.path.getsize(path)
@@ -21,10 +20,9 @@ class FileManager:
                 if min_size_bytes <= size <= max_size_bytes:
                     filtered_paths.append(path)
             
-            # Sort
             if sort_by == "mtime":
                 filtered_paths.sort(key=lambda x: os.path.getmtime(x))
-            else:  # Default to name sorting
+            else:
                 filtered_paths.sort()
                 
             files = [os.path.basename(p) for p in filtered_paths]
@@ -62,6 +60,16 @@ class FileManager:
             logging.error(f"Failed to delete {filename}: {str(e)}")
             raise Exception(f"Delete failed: {str(e)}")
 
+    def batch_delete(self, filenames):
+        results = {}
+        for filename in filenames:
+            try:
+                result = self.delete_file(filename)
+                results[filename] = "Success" if result else "Failed"
+            except Exception as e:
+                results[filename] = str(e)
+        return results
+
     def create_file(self, filename):
         try:
             full_path = os.path.join(self.current_dir, filename)
@@ -87,6 +95,16 @@ class FileManager:
             logging.error(f"Failed to copy {source} to {destination}: {str(e)}")
             raise Exception(f"Copy failed: {str(e)}")
 
+    def batch_copy(self, sources, destination):
+        results = {}
+        for source in sources:
+            try:
+                result = self.copy_file(source, os.path.join(destination, os.path.basename(source)))
+                results[source] = "Success" if result else "Failed"
+            except Exception as e:
+                results[source] = str(e)
+        return results
+
     def rename_file(self, old_name, new_name):
         try:
             old_path = os.path.join(self.current_dir, old_name)
@@ -97,11 +115,11 @@ class FileManager:
         except Exception as e:
             logging.error(f"Failed to rename {old_name} to {new_name}: {str(e)}")
             raise Exception(f"Rename failed: {str(e)}")
-        
+
     def move_file(self, source, destination):
         try:
             src_path = os.path.join(self.current_dir, source)
-            dest_path = os.path.abspath(destination)  # Support absolute paths
+            dest_path = os.path.abspath(destination)
             shutil.move(src_path, dest_path)
             logging.info(f"Moved {source} to {destination}")
             return True
@@ -109,11 +127,21 @@ class FileManager:
             logging.error(f"Failed to move {source} to {destination}: {str(e)}")
             raise Exception(f"Move failed: {str(e)}")
 
+    def batch_move(self, sources, destination):
+        results = {}
+        for source in sources:
+            try:
+                result = self.move_file(source, os.path.join(destination, os.path.basename(source)))
+                results[source] = "Success" if result else "Failed"
+            except Exception as e:
+                results[source] = str(e)
+        return results
+
     def read_file(self, filename):
         try:
             full_path = os.path.join(self.current_dir, filename)
             with open(full_path, 'r') as f:
-                content = f.read(1024)  # Read first 1KB
+                content = f.read(1024)
             logging.info(f"Viewed file: {filename}")
             return content
         except Exception as e:
