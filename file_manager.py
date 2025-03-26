@@ -64,3 +64,25 @@ class FileManager:
         except Exception as e:
             logging.error(f"Failed to copy {source} to {destination}: {str(e)}")
             return str(e)
+        
+    def rename_file(self, old_name, new_name):
+        try:
+            old_path = os.path.join(self.current_dir, old_name)
+            new_path = os.path.join(self.current_dir, new_name)
+            os.rename(old_path, new_path)
+            logging.info(f"Renamed {old_name} to {new_name}")
+            return True
+        except Exception as e:
+            logging.error(f"Failed to rename {old_name} to {new_name}: {str(e)}")
+            return str(e)
+        
+    def read_file(self, filename):
+        try:
+            full_path = os.path.join(self.current_dir, filename)
+            with open(full_path, 'r') as f:
+                content = f.read(1024)  # Read first 1KB
+            logging.info(f"Viewed file: {filename}")
+            return content
+        except Exception as e:
+            logging.error(f"Failed to read {filename}: {str(e)}")
+            return str(e)

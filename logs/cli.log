@@ -1,2 +1,8 @@
 2025-03-26 13:15:22,628 - INFO - Created file: test.txt
 2025-03-26 13:15:38,122 - INFO - Copied test.txt to test_copy.txt
+2025-03-26 13:37:38,595 - INFO - Configuration loaded successfully
+2025-03-26 13:37:50,688 - INFO - Created file: old.txt
+2025-03-26 13:38:04,924 - INFO - Renamed old.txt to new.txt
+2025-03-26 13:38:15,833 - INFO - Viewed file: new.txt
+2025-03-26 13:38:29,403 - INFO - Viewed file: new.txt
+2025-03-26 13:39:41,332 - INFO - Deleted: new.txt

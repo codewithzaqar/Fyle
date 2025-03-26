@@ -1,4 +1,5 @@
 import os
+import json
 from datetime import datetime
 import logging
 
@@ -20,3 +21,12 @@ def validate_path(path):
     if not exists:
         logging.warning(f"Path validation failed: {path} does not exist")
     return exists
+
+def load_config(config_file):
+    try:
+        with open(config_file, 'r') as f:
+            config = json.load(f)
+        logging.info("Configuration loaded successfully")
+        return config
+    except Exception as e:
+        raise Exception(f"Failed to load configuration: {str(e)}")

@@ -13,6 +13,8 @@ class CLIInterface:
         print("  del/rm <name> - Delete file or directory")
         print("  create <name> - Create new empty file")
         print("  copy <source> <dest> - Copy file or directory")
+        print("  rename <old> <new> - Rename file or directory")
+        print("  view <name> - View file contents (first 1KB)")
         print("  history - Show command history")
         print("  exit - Quit the program")
         print("  help - Show this message")
@@ -26,7 +28,7 @@ class CLIInterface:
             _  __/   _  /_/ /_  / /  __/
             /_/      _\__, / /_/  \___/ 
                      /____/              
-            Type 'help' for commands  v0.03""")
+            Type 'help' for commands  v0.04""")
         
         while self.running:
             command = input(f"\n{self.config['prompt']}").strip().split()
@@ -65,7 +67,19 @@ class CLIInterface:
                 if result is True:
                     print(f"Copied {command[1]} to {command[2]}")
                 else:
-                    print(f"Error: {result}")        
+                    print(f"Error: {result}")   
+            elif cmd == "rename" and len(command) > 2:
+                result = self.file_manager.rename_file(command[1], command[2])
+                if result is True:
+                    print(f"Renamed {command[1]} to {command[2]}")
+                else:
+                    print(f"Error: {result}")
+            elif cmd == "view" and len(command) > 1:
+                result = self.file_manager.read_file(command[1])
+                if isinstance(result, str) and not result.startswith("Error"):
+                    print(f"\nContents of {command[1]}:\n{result}")
+                else:
+                    print(f"Error: {result}")     
             elif cmd == "history":
                 for i, cmd in enumerate(self.history, 1):
                     print(f"{i}. {cmd}")
