@@ -15,6 +15,8 @@ class CLIInterface:
         print("  copy <source> <dest> - Copy file or directory")
         print("  rename <old> <new> - Rename file or directory")
         print("  view <name> - View file contents (first 1KB)")
+        print("  search <pattern> [r] - Search files(optional: r for recursive)")
+        print("  perms <name> - View file permissions")
         print("  history - Show command history")
         print("  exit - Quit the program")
         print("  help - Show this message")
@@ -28,7 +30,7 @@ class CLIInterface:
             _  __/   _  /_/ /_  / /  __/
             /_/      _\__, / /_/  \___/ 
                      /____/              
-            Type 'help' for commands  v0.04""")
+            Type 'help' for commands  v0.05""")
         
         while self.running:
             command = input(f"\n{self.config['prompt']}").strip().split()
@@ -80,6 +82,20 @@ class CLIInterface:
                     print(f"\nContents of {command[1]}:\n{result}")
                 else:
                     print(f"Error: {result}")     
+            elif cmd == "search" and len(command) > 1:
+                recursive = (len(command) > 2 and command[2].lower() == "r") or self.config["search_recursive"]
+                result = self.file_manager.search_files(command[1], recursive)
+                if isinstance(result, list):
+                    print(f"\nFound {len(result)} matches:")
+                    print("\n".join(result))
+                else:
+                    print(f"Error: {result}")
+            elif cmd == "perms" and len(command) > 1:
+                result = self.file_manager.get_file_permissions(command[1])
+                if isinstance(result, str) and not result.startswith("Error"):
+                    print(f"\nPermissions for {command[1]}: {result}")
+                else:
+                    print(f"Error: {result}")
             elif cmd == "history":
                 for i, cmd in enumerate(self.history, 1):
                     print(f"{i}. {cmd}")

@@ -6,3 +6,10 @@
 2025-03-26 13:38:15,833 - INFO - Viewed file: new.txt
 2025-03-26 13:38:29,403 - INFO - Viewed file: new.txt
 2025-03-26 13:39:41,332 - INFO - Deleted: new.txt
+2025-03-26 14:06:48,045 - INFO - Configuration loaded successfully
+2025-03-26 14:06:55,093 - INFO - Searched for 'txt' - found 0 matches
+2025-03-26 14:07:06,617 - INFO - Created file: test.txt
+2025-03-26 14:07:08,317 - INFO - Searched for 'txt' - found 1 matches
+2025-03-26 14:07:15,594 - INFO - Viewed permissions for: test.txt
+2025-03-26 14:07:28,842 - INFO - Viewed permissions for: test.txt
+2025-03-26 14:08:02,038 - INFO - Deleted: test.txt

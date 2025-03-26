@@ -2,6 +2,7 @@ import os
 import json
 from datetime import datetime
 import logging
+import stat
 
 def get_file_info(path):
     try:
@@ -30,3 +31,30 @@ def load_config(config_file):
         return config
     except Exception as e:
         raise Exception(f"Failed to load configuration: {str(e)}")
+    
+def validate_config(config):
+    required = {"version", "prompt", "max_history", "search_recursive"}
+    missing = required - set(config.keys())
+    if missing:
+        raise Exception(f"Missing config keys: {missing}")
+    
+def get_permissions(path):
+    try:
+        stats = os.stat(path)
+        mode = stats.st_mode
+        perms = ""
+        # Owner permissions
+        perms += "r" if mode & stat.S_IRUSR else "-"
+        perms += "w" if mode & stat.S_IWUSR else "-"
+        perms += "x" if mode & stat.S_IXUSR else "-"
+        # Group permissions
+        perms += "r" if mode & stat.S_IRGRP else "-"
+        perms += "w" if mode & stat.S_IWGRP else "-"
+        perms += "x" if mode & stat.S_IXGRP else "-"
+        # Other permissions
+        perms += "r" if mode & stat.S_IROTH else "-"
+        perms += "w" if mode & stat.S_IWOTH else "-"
+        perms += "x" if mode & stat.S_IXOTH else "-"
+        return perms
+    except Exception as e:
+        raise Exception(f"Failed to get permissions: {str(e)}")

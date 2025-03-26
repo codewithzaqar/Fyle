@@ -1,5 +1,6 @@
 {
-    "version": "0.04",
+    "version": "0.05",
     "prompt": "FyleCLI> ",
-    "max_history": 100
+    "max_history": 100,
+    "search_recursive": false
 }

@@ -1,7 +1,7 @@
 import os
 import shutil
 import logging
-from utils import get_file_info
+from utils import get_file_info, get_permissions
 
 class FileManager:
     def __init__(self):
@@ -85,4 +85,35 @@ class FileManager:
             return content
         except Exception as e:
             logging.error(f"Failed to read {filename}: {str(e)}")
+            return str(e)
+        
+    def search_files(self, pattern, recursive=False):
+        try:
+            matches = []
+            search_dir = self.current_dir
+
+            if recursive:
+                for root, _, files in os.walk(search_dir):
+                    for f in files:
+                        if pattern.lower() in f.lower():
+                            matches.append(os.path.relpath(os.path.join(root, f), search_dir))
+            else:
+                for f in os.listdir(search_dir):
+                    if pattern.lower() in f.lower():
+                        matches.append(f)
+
+            logging.info(f"Searched for '{pattern}' - found {len(matches)} matches")
+            return matches
+        except Exception as e:
+            logging.error(f"Search failed: {str(e)}")
+            return str(e)
+        
+    def get_file_permissions(self, filename):
+        try:
+            full_path = os.path.join(self.current_dir, filename)
+            perms = get_permissions(full_path)
+            logging.info(f"Viewed permissions for: {filename}")
+            return perms
+        except Exception as e:
+            logging.error(f"Failed to get permissions for {filename}: {str(e)}")
             return str(e)

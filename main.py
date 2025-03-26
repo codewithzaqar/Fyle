@@ -2,7 +2,7 @@ import logging
 import json
 from cli_interface import CLIInterface
 from file_manager import FileManager
-from utils import load_config
+from utils import load_config, validate_config
 
 def main():
     # Configure logging
@@ -15,11 +15,14 @@ def main():
     # Load configuration
     try:
         config = load_config('config.json')
+        validate_config(config)
     except Exception as e:
         logging.error(f"Failed to load config: {str(e)}")
         config = {
-            "version": "0.04",
-            "prompt": "FyleCLI> "
+            "version": "0.05",
+            "prompt": "FyleCLI> ",
+            "max_history": 100,
+            "search_recursive": False
         }
 
     file_manager = FileManager()
