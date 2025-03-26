@@ -17,9 +17,13 @@ class CLIInterface:
         print("  view <name> - View file contents (first 1KB)")
         print("  search <pattern> [r] - Search files(optional: r for recursive)")
         print("  perms <name> - View file permissions")
+        print("  edit <name> <content> - Append text to file")
         print("  history - Show command history")
         print("  exit - Quit the program")
         print("  help - Show this message")
+
+    def resolve_alias(self, cmd):
+        return self.config.get("aliases", {}).get(cmd, cmd)
 
     def run(self):
         self.running = True
@@ -30,14 +34,14 @@ class CLIInterface:
             _  __/   _  /_/ /_  / /  __/
             /_/      _\__, / /_/  \___/ 
                      /____/              
-            Type 'help' for commands  v0.05""")
+            Type 'help' for commands  v0.06""")
         
         while self.running:
             command = input(f"\n{self.config['prompt']}").strip().split()
             if not command:
                 continue
                 
-            cmd = command[0].lower()
+            cmd = self.resolve_alias(command[0].lower())
             self.history.append(" ".join(command))
             
             if cmd in ["exit", "quit"]:
@@ -94,6 +98,13 @@ class CLIInterface:
                 result = self.file_manager.get_file_permissions(command[1])
                 if isinstance(result, str) and not result.startswith("Error"):
                     print(f"\nPermissions for {command[1]}: {result}")
+                else:
+                    print(f"Error: {result}")
+            elif cmd == "edit" and len(command) > 2:
+                content = " ".join(command[2:])
+                result = self.file_manager.edit_file(command[1], content)
+                if result is True:
+                    print(f"Appended to {command[1]}")
                 else:
                     print(f"Error: {result}")
             elif cmd == "history":

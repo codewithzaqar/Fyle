@@ -7,11 +7,23 @@ class FileManager:
     def __init__(self):
         self.current_dir = os.getcwd()
 
-    def list_files(self, detailed=False):
-        files = os.listdir(self.current_dir)
-        if detailed:
-            return [get_file_info(os.path.join(self.current_dir, f)) for f in files]
-        return files
+    def list_files(self, detailed=False, sort_by="name"):
+        try:
+            files = os.listdir(self.current_dir)
+            full_paths = [os.path.join(self.current_dir, f) for f in files]
+
+            if sort_by == "mtime":
+                full_paths.sort(key=lambda x: os.path.getmtime(x))
+            else:  # Default to name sorting
+                full_paths.sort()
+
+            files = [os.path.basename(p) for p in full_paths]
+            if detailed:
+                return [get_file_info(p) for p in full_paths]
+            return files
+        except Exception as e:
+            logging.error(f"Failed to list files: {str(e)}")
+            return str(e)
 
     def change_dir(self, path):
         try:
@@ -116,4 +128,15 @@ class FileManager:
             return perms
         except Exception as e:
             logging.error(f"Failed to get permissions for {filename}: {str(e)}")
+            return str(e)
+        
+    def edit_file(self, filename, content):
+        try:
+            full_path = os.path.join(self.current_dir, filename)
+            with open(full_path, 'a') as f:
+                f.write(content + '\n')
+            logging.info(f"Edited file: {filename}")
+            return True
+        except Exception as e:
+            logging.error(f"Failed to edit {filename}: {str(e)}")
             return str(e)

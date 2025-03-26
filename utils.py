@@ -11,7 +11,7 @@ def get_file_info(path):
             "name": os.path.basename(path),
             "size": f"{stats.st_size} bytes",
             "modified": datetime.fromtimestamp(stats.st_mtime).strftime("%Y-%m-%d %H:%M:%S"),
-            "id_dir": os.path.isdir(path)
+            "is_dir": os.path.isdir(path)
         }
     except Exception as e:
         logging.error(f"Failed to get file info for {path}: {str(e)}")
@@ -31,27 +31,26 @@ def load_config(config_file):
         return config
     except Exception as e:
         raise Exception(f"Failed to load configuration: {str(e)}")
-    
+
 def validate_config(config):
-    required = {"version", "prompt", "max_history", "search_recursive"}
+    required = {"version", "prompt", "max_history", "search_recursive", "default_sort", "aliases"}
     missing = required - set(config.keys())
     if missing:
         raise Exception(f"Missing config keys: {missing}")
-    
+    if config["default_sort"] not in ["name", "mtime"]:
+        raise Exception(f"Invalid default_sort value: {config['default_sort']}")
+
 def get_permissions(path):
     try:
         stats = os.stat(path)
         mode = stats.st_mode
         perms = ""
-        # Owner permissions
         perms += "r" if mode & stat.S_IRUSR else "-"
         perms += "w" if mode & stat.S_IWUSR else "-"
         perms += "x" if mode & stat.S_IXUSR else "-"
-        # Group permissions
         perms += "r" if mode & stat.S_IRGRP else "-"
         perms += "w" if mode & stat.S_IWGRP else "-"
         perms += "x" if mode & stat.S_IXGRP else "-"
-        # Other permissions
         perms += "r" if mode & stat.S_IROTH else "-"
         perms += "w" if mode & stat.S_IWOTH else "-"
         perms += "x" if mode & stat.S_IXOTH else "-"

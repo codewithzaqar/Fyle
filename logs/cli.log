@@ -13,3 +13,9 @@
 2025-03-26 14:07:15,594 - INFO - Viewed permissions for: test.txt
 2025-03-26 14:07:28,842 - INFO - Viewed permissions for: test.txt
 2025-03-26 14:08:02,038 - INFO - Deleted: test.txt
+2025-03-26 14:39:22,818 - INFO - Configuration loaded successfully
+2025-03-26 14:40:06,394 - INFO - Edited file: test.txt
+2025-03-26 14:40:49,664 - INFO - Renamed test.txt to test1.txt
+2025-03-26 14:43:17,121 - INFO - Configuration loaded successfully
+2025-03-26 14:43:23,737 - INFO - Deleted: test1.txt
+2025-03-26 14:43:58,905 - INFO - Configuration loaded successfully

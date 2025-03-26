@@ -17,12 +17,17 @@ def main():
         config = load_config('config.json')
         validate_config(config)
     except Exception as e:
-        logging.error(f"Failed to load config: {str(e)}")
+        logging.error(f"Failed to load/validate config: {str(e)}")
         config = {
-            "version": "0.05",
+            "version": "0.06",
             "prompt": "FyleCLI> ",
             "max_history": 100,
-            "search_recursive": False
+            "search_recursive": False,
+            "default_sort": "name",
+            "aliases": {
+                "ls": "dir",
+                "rm": "del"
+            }
         }
 
     file_manager = FileManager()
