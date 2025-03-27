@@ -22,6 +22,7 @@ A simple command-line interface for basic file system operations with advanced f
 - Command history with timestamps and limit
 - Execute commands from history (exec)
 - Run command scripts (script)
+- Tab completion for commands
 - Error logging (logs/cli.log)
 - Configuration file support (config.json)
 - Command aliases
@@ -59,6 +60,7 @@ A simple command-line interface for basic file system operations with advanced f
 - `tag <name> <tag>`: Add tag to file
 - `untag <name> <tag>`: Remove tag from file
 - `tags <name>`: Show tags for file
+- `tagsearch <tag> [r]`: Search files by tag (r for recursive)  
 - `history`: Show command history with timestamps
 - `exec <number>`: Execute command from history by number
 - `script <filename>`: Run commands from script file in script_dir
@@ -75,6 +77,7 @@ Edit `config.json` to customize:
 - `min_size`: Minimum file size filter (bytes or with k/m/g)
 - `max_size`: Maximum file size filter (null or bytes with k/m/g)
 - `autocomplete`: Enable command suggestions (true/false)
+- `completion_enabled`: Enable tab completion (true/false)
 - `log_level`: Logging level (DEBUG/INFO/WARNING/ERROR/CRITICAL)
 - `batch_enabled`: Enable batch operations (true/false)
 - `tags_enabled`: Enable tagging (true/false)
