@@ -32,6 +32,8 @@ A simple command-line interface for basic file system operations with advanced f
 
 ## Requirements
 - Python 3.x
+- `prompt_toolkit` (install with `pip install prompt_toolkit`)
+- `colorama` (install with `pip install colorama`)
 
 ## Usage
 1. Configure settings in `config.json` (optional)
