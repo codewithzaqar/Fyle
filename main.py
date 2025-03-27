@@ -1,11 +1,14 @@
 import logging
 import json
+from colorama import init as colorama_init
 from cli_interface import CLIInterface
 from file_manager import FileManager
 from utils import load_config, validate_config, setup_logging
 
 def main():
-    # Load configuration first to get log level
+    # Initialize colorama for cross-platform color support
+    colorama_init()
+
     try:
         config = load_config('config.json')
         validate_config(config)
@@ -14,7 +17,7 @@ def main():
         logging.error(f"Configuration error: {str(e)}")
         print(f"Warning: Configuration error - using defaults: {str(e)}")
         config = {
-            "version": "0.11",
+            "version": "0.12",
             "prompt": "FyleCLI> ",
             "max_history": 100,
             "search_recursive": False,
@@ -23,6 +26,7 @@ def main():
             "max_size": None,
             "autocomplete": True,
             "completion_enabled": True,
+            "color_enabled": True,
             "log_level": "INFO",
             "batch_enabled": True,
             "tags_enabled": True,

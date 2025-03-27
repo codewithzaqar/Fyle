@@ -22,7 +22,8 @@ A simple command-line interface for basic file system operations with advanced f
 - Command history with timestamps and limit
 - Execute commands from history (exec)
 - Run command scripts (script)
-- Tab completion for commands
+- Tab completion for commands and file names
+- Color output for better readability
 - Error logging (logs/cli.log)
 - Configuration file support (config.json)
 - Command aliases
@@ -78,6 +79,7 @@ Edit `config.json` to customize:
 - `max_size`: Maximum file size filter (null or bytes with k/m/g)
 - `autocomplete`: Enable command suggestions (true/false)
 - `completion_enabled`: Enable tab completion (true/false)
+- `color_enabled`: Enable color output (true/false)
 - `log_level`: Logging level (DEBUG/INFO/WARNING/ERROR/CRITICAL)
 - `batch_enabled`: Enable batch operations (true/false)
 - `tags_enabled`: Enable tagging (true/false)
