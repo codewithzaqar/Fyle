@@ -1,29 +1,31 @@
-# Fyle
-
-A simple command-line interface for basic file system operations with advanced features.
+A command-line interface for file system operations with advanced features.
 
 ## Features
 - List files with sorting and size filtering
 - Change directory (cd)
 - Show current path (pwd)
 - Delete files or directories (del/rm)
-- Batch delete files (batch_del)
+- Batch delete files (batch_del) with progress
 - Create empty files (create)
 - Copy files or directories (copy)
-- Batch copy files (batch_copy)
+- Batch copy files (batch_copy) with progress
 - Rename files or directories (rename/mv)
 - Move files or directories (move)
-- Batch move files (batch_move)
+- Batch move files (batch_move) with progress
 - View file contents (view/cat, first 1KB)
 - Search files (search, optional recursive)
 - View file permissions (perms)
 - Edit files (append text)
 - Tag files (tag/untag/tags)
+- Search files by tag (tagsearch)
+- Compress files/directories to zip (compress) with progress
+- Extract zip files (extract) with progress
 - Command history with timestamps and limit
 - Execute commands from history (exec)
 - Run command scripts (script)
 - Tab completion for commands and file names
 - Color output for better readability
+- Progress indicators for batch and compression operations
 - Error logging (logs/cli.log)
 - Configuration file support (config.json)
 - Command aliases
@@ -34,12 +36,13 @@ A simple command-line interface for basic file system operations with advanced f
 - Python 3.x
 - `prompt_toolkit` (install with `pip install prompt_toolkit`)
 - `colorama` (install with `pip install colorama`)
+- `tqdm` (install with `pip install tqdm`)
 
 ## Usage
 1. Configure settings in `config.json` (optional)
 2. Create a `scripts` directory for script files (optional)
 3. Run `python main.py` from the command line
-4. Type commands at the prompt
+4. Type commands at the prompt (use Tab for completion)
 5. Type 'exit' to quit
 6. Check `logs/cli.log` for operation history
 7. Tags stored in `tags.json`
@@ -63,7 +66,9 @@ A simple command-line interface for basic file system operations with advanced f
 - `tag <name> <tag>`: Add tag to file
 - `untag <name> <tag>`: Remove tag from file
 - `tags <name>`: Show tags for file
-- `tagsearch <tag> [r]`: Search files by tag (r for recursive)  
+- `tagsearch <tag> [r]`: Search files by tag (r for recursive)
+- `compress <source> <zip_name>`: Compress file or directory to zip
+- `extract <zip_name> [dest_dir]`: Extract zip to directory (default: current dir)
 - `history`: Show command history with timestamps
 - `exec <number>`: Execute command from history by number
 - `script <filename>`: Run commands from script file in script_dir
@@ -82,8 +87,8 @@ Edit `config.json` to customize:
 - `autocomplete`: Enable command suggestions (true/false)
 - `completion_enabled`: Enable tab completion (true/false)
 - `color_enabled`: Enable color output (true/false)
+- `progress_enabled`: Enable progress indicators (true/false)
 - `log_level`: Logging level (DEBUG/INFO/WARNING/ERROR/CRITICAL)
 - `batch_enabled`: Enable batch operations (true/false)
 - `tags_enabled`: Enable tagging (true/false)
-- `script_dir`: Directory for script files
-- `aliases`: Command aliases dictionary
+- `script_dir`: Directory for script file
