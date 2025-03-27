@@ -15,9 +15,9 @@ class CLIInterface:
             "dir", "ls", "cd", "pwd", "del", "rm", 'create', "copy",
             "rename", "mv", "move", "view", "cat", "search", "perms",
             "edit", "history", "help", "exit", "batch_del", "batch_copy",
-            "batch_move", "exec", "tag", "untag", "tags", "script", "tagsearch"
+            "batch_move", "exec", "tag", "untag", "tags", "script", "tagsearch",
+            "compress", "extract"
         ]
-        # Nested completer for commands and file names
         self.completer = NestedCompleter.from_nested_dict({
             cmd: None if cmd in ["dir", "ls", "pwd", "history", "help", "exit"]
             else WordCompleter(get_file_completions(self.file_manager.get_current_dir()))
@@ -48,6 +48,8 @@ class CLIInterface:
             print(f"{Fore.GREEN}  untag <name> <tag>{Style.RESET_ALL} - Remove tag from file")
             print(f"{Fore.GREEN}  tags <name>{Style.RESET_ALL} - Show tags for file")
             print(f"{Fore.GREEN}  tagsearch <tag> [r]{Style.RESET_ALL} - Search files by tag (r for recursive)")
+            print(f"{Fore.GREEN}  compress <source> <zip_name>{Style.RESET_ALL} - Compress file or directory to zip")
+            print(f"{Fore.GREEN}  extract <zip_name> [dest_dir]{Style.RESET_ALL} - Extract zip to directory")
             print(f"{Fore.GREEN}  history{Style.RESET_ALL} - Show command history with timestamps")
             print(f"{Fore.GREEN}  exec <number>{Style.RESET_ALL} - Execute command from history")
             print(f"{Fore.GREEN}  script <filename>{Style.RESET_ALL} - Run commands from script file")
@@ -74,11 +76,13 @@ class CLIInterface:
             print("  untag <name> <tag> - Remove tag from file")
             print("  tags <name> - Show tags for file")
             print("  tagsearch <tag> [r] - Search files by tag (r for recursive)")
+            print("  compress <source> <zip_name> - Compress file or directory to zip")
+            print("  extract <zip_name> [dest_dir] - Extract zip to directory")
             print("  history - Show command history with timestamps")
             print("  exec <number> - Execute command from history")
             print("  script <filename> - Run commands from script file")
             print("  exit - Quit the program")
-            print("  help - Show this message")
+            print("  help - Show this message") 
 
     def resolve_alias(self, cmd):
         return self.config.get("aliases", {}).get(cmd, cmd)
@@ -96,7 +100,7 @@ class CLIInterface:
             _  __/   _  /_/ /_  / /  __/
             /_/      _\__, / /_/  \___/ 
                      /____/              
-            Type 'help' for commands  v0.12""")
+            Type 'help' for commands  v0.13""")
         
         while self.running:
             try:
@@ -143,7 +147,7 @@ class CLIInterface:
                     else:
                         print(f"{Fore.RED}Error: {result}{Style.RESET_ALL}" if self.config["color_enabled"] else f"Error: {result}")
                 elif cmd == "batch_del" and len(command) > 1 and self.config["batch_enabled"]:
-                    results = self.file_manager.batch_delete(command[1:])
+                    results = self.file_manager.batch_delete(command[1:], progress=self.config["progress_enabled"])
                     for fname, result in results.items():
                         if self.config["color_enabled"]:
                             color = Fore.GREEN if result == "Success" else Fore.RED
@@ -165,7 +169,7 @@ class CLIInterface:
                 elif cmd == "batch_copy" and len(command) > 2 and self.config["batch_enabled"]:
                     sources = command[1:-1]
                     dest = command[-1]
-                    results = self.file_manager.batch_copy(sources, dest)
+                    results = self.file_manager.batch_copy(sources, dest, progress=self.config["progress_enabled"])
                     for src, result in results.items():
                         if self.config["color_enabled"]:
                             color = Fore.GREEN if result == "Success" else Fore.RED
@@ -187,7 +191,7 @@ class CLIInterface:
                 elif cmd == "batch_move" and len(command) > 2 and self.config["batch_enabled"]:
                     sources = command[1:-1]
                     dest = command[-1]
-                    results = self.file_manager.batch_move(sources, dest)
+                    results = self.file_manager.batch_move(sources, dest, progress=self.config["progress_enabled"])
                     for src, result in results.items():
                         if self.config["color_enabled"]:
                             color = Fore.GREEN if result == "Success" else Fore.RED
@@ -264,6 +268,20 @@ class CLIInterface:
                             print("\n".join(result))
                     else:
                         print(f"{Fore.RED}Error: {result}{Style.RESET_ALL}" if self.config["color_enabled"] else f"Error: {result}")
+                elif cmd == "compress" and len(command) > 2:
+                    result = self.file_manager.compress(command[1], command[2], progress=self.config["progress_enabled"])
+                    if result is True:
+                        print(f"{Fore.GREEN}Compressed {command[1]} to {command[2]}{Style.RESET_ALL}" if self.config["color_enabled"] else f"Compressed {command[1]} to {command[2]}")
+                    else:
+                        print(f"{Fore.RED}Error: {result}{Style.RESET_ALL}" if self.config["color_enabled"] else f"Error: {result}")
+                elif cmd == "extract" and len(command) > 1:
+                    dest_dir = command[2] if len(command) > 2 else None
+                    result = self.file_manager.extract(command[1], dest_dir, progress=self.config["progress_enabled"])
+                    if result is True:
+                        dest = dest_dir if dest_dir else "current directory"
+                        print(f"{Fore.GREEN}Extracted {command[1]} to {dest}{Style.RESET_ALL}" if self.config["color_enabled"] else f"Extracted {command[1]} to {dest}")
+                    else:
+                        print(f"{Fore.RED}Error: {result}{Style.RESET_ALL}" if self.config["color_enabled"] else f"Error: {result}")
                 elif cmd == "history":
                     if self.config["color_enabled"]:
                         for i, (ts, cmd) in enumerate(self.history, 1):
@@ -321,7 +339,7 @@ class CLIInterface:
             if sort_by not in ["name", "mtime"]:
                 sort_by = self.config["default_sort"]
             files = self.file_manager.list_files(detailed, sort_by, min_size, max_size)
-            if self.config["color_enabled"]: 
+            if self.config["color_enabled"]:
                 for f in files:
                     if isinstance(f, dict) and f.get("is_dir"):
                         print(f"{Fore.BLUE}{f['name']}{Style.RESET_ALL}")

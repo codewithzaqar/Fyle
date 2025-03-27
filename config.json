@@ -9,6 +9,7 @@
     "autocomplete": true,
     "completion_enabled": true,
     "color_enabled": true,
+    "progress_enabled": true,
     "log_level": "INFO",
     "batch_enabled": true,
     "tags_enabled": true,

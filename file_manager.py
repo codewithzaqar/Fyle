@@ -2,6 +2,8 @@ import os
 import shutil
 import json
 import logging
+import zipfile
+from tqdm import tqdm
 from utils import get_file_info, get_permissions, size_to_bytes
 
 class FileManager:
@@ -284,3 +286,42 @@ class FileManager:
         except Exception as e:
             logging.error(f"Tag search failed: {str(e)}")
             raise Exception(f"Tag search failed: {str(e)}")
+        
+    def compress(self, source, zip_name, progress=False):
+        try:
+            src_path = os.path.join(self.current_dir, source)
+            zip_path = os.path.join(self.current_dir, zip_name)
+            if not zip_path.endswith('.zip'):
+                zip_path += '.zip'
+
+            with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zf:
+                if os.path.isdir(src_path):
+                    files = [os.path.join(root, f) for root, _, fs in os.walk(src_path) for f in fs]
+                    iterator = tqdm(files, desc=f"Compressing {source}") if progress else files
+                    for file in iterator:
+                        zf.write(file, os.path.relpath(file, self.current_dir))
+                else:
+                    zf.write(src_path, os.path.basename(src_path))
+
+            logging.info(f"Compressed {source} to {zip_name}")
+            return True
+        except Exception as e:
+            logging.error(f"Failed to compress {source}: {str(e)}")
+            raise Exception(f"Compress failed: {str(e)}")
+        
+    def extract(self, zip_name, dest_dir=None, progress=False):
+        try:
+            zip_path = os.path.join(self.current_dir, zip_name)
+            dest_path = os.path.join(self.current_dir, dest_dir) if dest_dir else self.current_dir
+
+            with zipfile.ZipFile(zip_path, 'r') as zf:
+                files = zf.namelist()
+                iterator = tqdm(files, desc=f"Extracting {zip_name}") if progress else files
+                for file in iterator:
+                    zf.extract(file, dest_path)
+                
+            logging.info(f"Extracted {zip_name} to {dest_path}")
+            return True
+        except Exception as e:
+            logging.error(f"Failed to extract {zip_name}: {str(e)}")
+            raise Exception(f"Extract failed: {str(e)}")

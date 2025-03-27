@@ -36,7 +36,8 @@ def load_config(config_file):
 def validate_config(config):
     required = {"version", "prompt", "max_history", "search_recursive", "default_sort", 
                 "min_size", "max_size", "aliases", "autocomplete", "log_level", 
-                "batch_enabled", "tags_enabled", "script_dir", "completion_enabled", "color_enabled"}
+                "batch_enabled", "tags_enabled", "script_dir", "completion_enabled",
+                "color_enabled", "progress_enabled"}
     missing = required - set(config.keys())
     if missing:
         raise Exception(f"Missing config keys: {missing}")
@@ -60,6 +61,8 @@ def validate_config(config):
         raise Exception(f"Invalid completion_enabled value: {config['completion_enabled']}")
     if not isinstance(config["color_enabled"], bool):
         raise Exception(f"Invalid color_enabled value: {config['color_enabled']}")
+    if not isinstance(config["progress_enabled"], bool):
+        raise Exception(f"Invalid progress_enabled value: {config['progress_enabled']}")
 
 def setup_logging(log_file, log_level):
     level_map = {
