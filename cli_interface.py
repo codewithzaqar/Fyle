@@ -1,6 +1,8 @@
 import os
 from datetime import datetime
-from utils import suggest_commands, run_script
+from prompt_toolkit import PromptSession
+from prompt_toolkit.completion import WordCompleter
+from utils import suggest_commands, run_script, get_file_completions
 
 class CLIInterface:
     def __init__(self, file_manager, config):
@@ -12,8 +14,11 @@ class CLIInterface:
             "dir", "ls", "cd", "pwd", "del", "rm", 'create', "copy",
             "rename", "mv", "move", "view", "cat", "search", "perms",
             "edit", "history", "help", "exit", "batch_del", "batch_copy",
-            "batch_move", "exec", "tag", "untag", "tags", "script"
+            "batch_move", "exec", "tag", "untag", "tags", "script", "tagsearch"
         ]
+        self.completer = WordCompleter(self.commands + list(self.config["aliases"].keys()), ignore_case=True)
+        self.session = PromptSession(completer=self.completer if self.config["completion_enabled"] else None,
+                                    complete_while_typing=True)
 
     def display_help(self):
         print("\nCommands:")
@@ -35,6 +40,7 @@ class CLIInterface:
         print("  tag <name> <tag> - Add tag to file")
         print("  untag <name> <tag> - Remove tag from file")
         print("  tags <name> - Show tags for file")
+        print("  tagsearch <tag> [r] - Search files by tag (r for recursive)")
         print("  history - Show command history with timestamps")
         print("  exec <number> - Execute command from history")
         print("  script <filename> - Run commands from script file")
@@ -57,7 +63,7 @@ class CLIInterface:
             _  __/   _  /_/ /_  / /  __/
             /_/      _\__, / /_/  \___/ 
                      /____/              
-            Type 'help' for commands  v0.10""")
+            Type 'help' for commands  v0.11""")
         
         while self.running:
             try:
@@ -178,6 +184,14 @@ class CLIInterface:
                         print(f"Tags for {command[1]}: {', '.join(tags) if tags else 'None'}")
                     else:
                         print(f"Error: {tags}")
+                elif cmd == "tagsearch" and len(command) > 1 and self.config["tags_enabled"]:
+                    recursive = (len(command) > 2 and command[2].lower() == "r")
+                    result = self.file_manager.search_by_tag(command[1], recursive)
+                    if isinstance(result, list):
+                        print(f"\nFound {len(result)} files with tag '{command[1]}':")
+                        print("\n".join(result))
+                    else:
+                        print(f"Error: {result}")
                 elif cmd == "history":
                     for i, (ts, cmd) in enumerate(self.history, 1):
                         print(f"{i}. [{ts}] {cmd}")
@@ -226,4 +240,3 @@ class CLIInterface:
                 sort_by = self.config["default_sort"]
             files = self.file_manager.list_files(detailed, sort_by, min_size, max_size)
             print("\n".join(str(f) for f in files))
-        # Add other commands as needed for exec/script functionality

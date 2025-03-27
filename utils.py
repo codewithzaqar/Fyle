@@ -36,7 +36,7 @@ def load_config(config_file):
 def validate_config(config):
     required = {"version", "prompt", "max_history", "search_recursive", "default_sort", 
                 "min_size", "max_size", "aliases", "autocomplete", "log_level", 
-                "batch_enabled", "tags_enabled", "script_dir"}
+                "batch_enabled", "tags_enabled", "script_dir", "completion_enabled"}
     missing = required - set(config.keys())
     if missing:
         raise Exception(f"Missing config keys: {missing}")
@@ -56,6 +56,8 @@ def validate_config(config):
         raise Exception(f"Invalid tags_enabled value: {config['tags_enabled']}")
     if not isinstance(config["script_dir"], str):
         raise Exception(f"Invalid script_dir value: {config['script_dir']}")
+    if not isinstance(config["completion_enabled"], bool):
+        raise Exception(f"Invalid completion_enabled value: {config['completion_enabled']}")
 
 def setup_logging(log_file, log_level):
     level_map = {
@@ -110,8 +112,14 @@ def run_script(script_path, cli):
         with open(script_path, 'r') as f:
             for line in f:
                 line = line.strip()
-                if line and not line.startswith('#'):  # Skip empty lines and comments
+                if line and not line.startswith('#'):
                     cli.run_command(line.split())
         return True
     except Exception as e:
         return f"Failed to run script: {str(e)}"
+    
+def get_file_completions(directory):
+    try:
+        return [f for f in os.listdir(directory) if not f.startswith('.')]
+    except Exception:
+        return []

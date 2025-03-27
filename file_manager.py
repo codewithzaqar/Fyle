@@ -261,3 +261,27 @@ class FileManager:
         except Exception as e:
             logging.error(f"Failed to get tags for {filename}: {str(e)}")
             raise Exception(f"Tag get failed: {str(e)}")
+        
+    def search_by_tag(self, tag, recursive=False):
+        try:
+            matches = []
+            search_dir = self.current_dir
+
+            if recursive:
+                for root, _, files in os.walk(search_dir):
+                    for f in files:
+                        full_path = os.path.join(root, f)
+                        if full_path in self.tags and tag in self.tags[full_path]:
+                            matches.append(os.path.relpath(full_path, search_dir))
+
+            else:
+                for f in os.listdir(search_dir):
+                    full_path = os.path.join(search_dir, f)
+                    if full_path in self.tags and tag in self.tags[full_path]:
+                        matches.append(f)
+
+            logging.info(f"Searched for tag '{tag}' - found {len(matches)} matches")
+            return matches
+        except Exception as e:
+            logging.error(f"Tag search failed: {str(e)}")
+            raise Exception(f"Tag search failed: {str(e)}")

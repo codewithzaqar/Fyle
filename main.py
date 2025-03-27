@@ -14,7 +14,7 @@ def main():
         logging.error(f"Configuration error: {str(e)}")
         print(f"Warning: Configuration error - using defaults: {str(e)}")
         config = {
-            "version": "0.09",
+            "version": "0.11",
             "prompt": "FyleCLI> ",
             "max_history": 100,
             "search_recursive": False,
@@ -22,8 +22,11 @@ def main():
             "min_size": 0,
             "max_size": None,
             "autocomplete": True,
+            "completion_enabled": True,
             "log_level": "INFO",
             "batch_enabled": True,
+            "tags_enabled": True,
+            "script_dir": "scripts",
             "aliases": {
                 "ls": "dir",
                 "rm": "del",
@@ -32,7 +35,6 @@ def main():
             }
         }
     
-    # Setup logging with configured level
     setup_logging('logs/cli.log', config["log_level"])
 
     file_manager = FileManager()
