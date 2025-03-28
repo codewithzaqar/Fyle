@@ -37,7 +37,7 @@ def validate_config(config):
     required = {"version", "prompt", "max_history", "search_recursive", "default_sort", 
                 "min_size", "max_size", "aliases", "autocomplete", "log_level", 
                 "batch_enabled", "tags_enabled", "script_dir", "completion_enabled",
-                "color_enabled", "progress_enabled"}
+                "color_enabled", "progress_enabled", "variables_enabled"}
     missing = required - set(config.keys())
     if missing:
         raise Exception(f"Missing config keys: {missing}")
@@ -63,6 +63,8 @@ def validate_config(config):
         raise Exception(f"Invalid color_enabled value: {config['color_enabled']}")
     if not isinstance(config["progress_enabled"], bool):
         raise Exception(f"Invalid progress_enabled value: {config['progress_enabled']}")
+    if not isinstance(config["variables_enabled"], bool):
+        raise Exception(f"Invalid variables_enabled value: {config['variables_enables']}")
 
 def setup_logging(log_file, log_level):
     level_map = {
@@ -95,6 +97,27 @@ def get_permissions(path):
         return perms
     except Exception as e:
         raise Exception(f"Failed to get permissions: {str(e)}")
+    
+def set_permissions(path, perms):
+    try:
+        current_mode = os.stat(path).st_mode
+        if perms.startswith('+') or perms.startswith('-'):
+            # Symbolic mode (e.g., +x, -w)
+            mode = current_mode
+            for p in perms[1:]:
+                if p == 'r':
+                    mode |= stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH if perms[0] == '+' else ~(stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
+                elif p == 'w':
+                    mode |= stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH if perms[0] == '+' else ~(stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH)
+                elif p == 'x':
+                    mode |= stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH if perms[0] == '+' else ~(stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+            os.chmod(path, mode & 0o777)  # Mask to keep only permission bits
+        else:
+            # Octal mode (e.g., 755)
+            mode = int(perms, 8)
+            os.chmod(path, mode)
+    except Exception as e:
+        raise Exception(f"Failed to set permissions: {str(e)}")
 
 def size_to_bytes(size):
     if size is None:
@@ -128,3 +151,6 @@ def get_file_completions(directory):
         return [f for f in os.listdir(directory) if not f.startswith('.')]
     except Exception:
         return []
+    
+def parse_variables(command, variables):
+    return [arg.replace(f"${key}", value) for key, value in variables.items() for arg in command if f"${key}" in arg] or command

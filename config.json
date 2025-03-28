@@ -1,5 +1,5 @@
 {
-    "version": "0.12",
+    "version": "0.14",
     "prompt": "FyleCLI> ",
     "max_history": 100,
     "search_recursive": false,
@@ -10,6 +10,7 @@
     "completion_enabled": true,
     "color_enabled": true,
     "progress_enabled": true,
+    "variables_enabled": true,
     "log_level": "INFO",
     "batch_enabled": true,
     "tags_enabled": true,

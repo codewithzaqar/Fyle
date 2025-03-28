@@ -4,7 +4,7 @@ import json
 import logging
 import zipfile
 from tqdm import tqdm
-from utils import get_file_info, get_permissions, size_to_bytes
+from utils import get_file_info, get_permissions, size_to_bytes, set_permissions
 
 class FileManager:
     def __init__(self):
@@ -214,6 +214,16 @@ class FileManager:
         except Exception as e:
             logging.error(f"Failed to get permissions for {filename}: {str(e)}")
             raise Exception(f"Permissions check failed: {str(e)}")
+        
+    def set_file_permissions(self, filename, perms):
+        try:
+            full_path = os.path.join(self.current_dir, filename)
+            set_permissions(full_path, perms)
+            logging.info(f"Set permissions for {filename} to {perms}")
+            return True
+        except Exception as e:
+            logging.error(f"Failed to set permissions for {filename}: {str(e)}")
+            raise Exception(f"Permissions set failed: {str(e)}")
 
     def edit_file(self, filename, content):
         try:
@@ -320,6 +330,23 @@ class FileManager:
                 for file in iterator:
                     zf.extract(file, dest_path)
                 
+            logging.info(f"Extracted {zip_name} to {dest_path}")
+            return True
+        except Exception as e:
+            logging.error(f"Failed to extract {zip_name}: {str(e)}")
+            raise Exception(f"Extract failed: {str(e)}")
+        
+    def extract(self, zip_name, dest_dir=None, progress=False):
+        try:
+            zip_path = os.path.join(self.current_dir, zip_name)
+            dest_path = os.path.join(self.current_dir, dest_dir) if dest_dir else self.current_dir
+
+            with zipfile.ZipFile(zip_path, 'r') as zf:
+                files = zf.namelist()
+                iterator = tqdm(files, desc=f"Extracting {zip_name}") if progress else files
+                for file in iterator:
+                    zf.extract(file, dest_path)
+
             logging.info(f"Extracted {zip_name} to {dest_path}")
             return True
         except Exception as e:

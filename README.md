@@ -26,6 +26,7 @@ A command-line interface for file system operations with advanced features.
 - Command history with timestamps and limit
 - Execute commands from history (exec)
 - Run command scripts (script)
+- Set variables for scripts (set)
 - Tab completion for commands and file names
 - Color output for better readability
 - Progress indicators for batch and compression operations
@@ -72,6 +73,7 @@ A command-line interface for file system operations with advanced features.
 - `tagsearch <tag> [r]`: Search files by tag (r for recursive)
 - `compress <source> <zip_name>`: Compress file or directory to zip
 - `extract <zip_name> [dest_dir]`: Extract zip to directory (default: current dir)
+- `set <var> <value>`: Set a variable for use in scripts (e.g., set dest /path)
 - `history`: Show command history with timestamps
 - `exec <number>`: Execute command from history by number
 - `script <filename>`: Run commands from script file in script_dir
@@ -91,7 +93,9 @@ Edit `config.json` to customize:
 - `completion_enabled`: Enable tab completion (true/false)
 - `color_enabled`: Enable color output (true/false)
 - `progress_enabled`: Enable progress indicators (true/false)
+- `variables_enabled`: Enable variables in scripts (true/false)
 - `log_level`: Logging level (DEBUG/INFO/WARNING/ERROR/CRITICAL)
 - `batch_enabled`: Enable batch operations (true/false)
 - `tags_enabled`: Enable tagging (true/false)
 - `script_dir`: Directory for script file
+- `aliases`: Command aliases dictionary

@@ -3,7 +3,7 @@ from datetime import datetime
 from prompt_toolkit import PromptSession
 from prompt_toolkit.completion import WordCompleter, NestedCompleter
 from colorama import Fore, Style
-from utils import suggest_commands, run_script, get_file_completions
+from utils import suggest_commands, run_script, get_file_completions, parse_variables
 
 class CLIInterface:
     def __init__(self, file_manager, config):
@@ -11,12 +11,13 @@ class CLIInterface:
         self.config = config
         self.running = False
         self.history = []
+        self.variables = {}  # Store variables for script usage
         self.commands = [
             "dir", "ls", "cd", "pwd", "del", "rm", 'create', "copy",
             "rename", "mv", "move", "view", "cat", "search", "perms",
             "edit", "history", "help", "exit", "batch_del", "batch_copy",
             "batch_move", "exec", "tag", "untag", "tags", "script", "tagsearch",
-            "compress", "extract"
+            "compress", "extract", "chmod", "set"
         ]
         self.completer = NestedCompleter.from_nested_dict({
             cmd: None if cmd in ["dir", "ls", "pwd", "history", "help", "exit"]
@@ -43,6 +44,7 @@ class CLIInterface:
             print(f"{Fore.GREEN}  view/cat <name>{Style.RESET_ALL} - View file contents (first 1KB)")
             print(f"{Fore.GREEN}  search <pattern> [r]{Style.RESET_ALL} - Search files (r for recursive)")
             print(f"{Fore.GREEN}  perms <name>{Style.RESET_ALL} - View file permissions")
+            print(f"{Fore.GREEN}  chmod <name> <perms>{Style.RESET_ALL} - Set file permissions (e.g., +x, 755)")
             print(f"{Fore.GREEN}  edit <name> <content>{Style.RESET_ALL} - Append text to file")
             print(f"{Fore.GREEN}  tag <name> <tag>{Style.RESET_ALL} - Add tag to file")
             print(f"{Fore.GREEN}  untag <name> <tag>{Style.RESET_ALL} - Remove tag from file")
@@ -50,6 +52,7 @@ class CLIInterface:
             print(f"{Fore.GREEN}  tagsearch <tag> [r]{Style.RESET_ALL} - Search files by tag (r for recursive)")
             print(f"{Fore.GREEN}  compress <source> <zip_name>{Style.RESET_ALL} - Compress file or directory to zip")
             print(f"{Fore.GREEN}  extract <zip_name> [dest_dir]{Style.RESET_ALL} - Extract zip to directory")
+            print(f"{Fore.GREEN}  set <var> <value>{Style.RESET_ALL} - Set a variable for scripts")
             print(f"{Fore.GREEN}  history{Style.RESET_ALL} - Show command history with timestamps")
             print(f"{Fore.GREEN}  exec <number>{Style.RESET_ALL} - Execute command from history")
             print(f"{Fore.GREEN}  script <filename>{Style.RESET_ALL} - Run commands from script file")
@@ -71,6 +74,7 @@ class CLIInterface:
             print("  view/cat <name> - View file contents (first 1KB)")
             print("  search <pattern> [r] - Search files (r for recursive)")
             print("  perms <name> - View file permissions")
+            print("  chmod <name> <perms> - Set file permissions (e.g., +x, 755)")
             print("  edit <name> <content> - Append text to file")
             print("  tag <name> <tag> - Add tag to file")
             print("  untag <name> <tag> - Remove tag from file")
@@ -78,6 +82,7 @@ class CLIInterface:
             print("  tagsearch <tag> [r] - Search files by tag (r for recursive)")
             print("  compress <source> <zip_name> - Compress file or directory to zip")
             print("  extract <zip_name> [dest_dir] - Extract zip to directory")
+            print("  set <var> <value> - Set a variable for scripts")
             print("  history - Show command history with timestamps")
             print("  exec <number> - Execute command from history")
             print("  script <filename> - Run commands from script file")
@@ -100,7 +105,7 @@ class CLIInterface:
             _  __/   _  /_/ /_  / /  __/
             /_/      _\__, / /_/  \___/ 
                      /____/              
-            Type 'help' for commands  v0.13""")
+            Type 'help' for commands  v0.14""")
         
         while self.running:
             try:
@@ -228,6 +233,12 @@ class CLIInterface:
                             print(f"\nPermissions for {command[1]}: {result}")
                     else:
                         print(f"{Fore.RED}Error: {result}{Style.RESET_ALL}" if self.config["color_enabled"] else f"Error: {result}")
+                elif cmd == "chmod" and len(command) > 2:
+                    result = self.file_manager.set_file_permissions(command[1], command[2])
+                    if result is True:
+                        print(f"{Fore.GREEN}Set permissions for {command[1]} to {command[2]}{Style.RESET_ALL}" if self.config["color_enabled"] else f"Set permission for {command[1]} to {command[2]}")
+                    else:
+                        print(f"{Fore.RED}Error: {result}{Style.RESET_ALL}" if self.config["color_enabled"] else f"Error: {result}")
                 elif cmd == "edit" and len(command) > 2:
                     content = " ".join(command[2:])
                     result = self.file_manager.edit_file(command[1], content)
@@ -282,6 +293,14 @@ class CLIInterface:
                         print(f"{Fore.GREEN}Extracted {command[1]} to {dest}{Style.RESET_ALL}" if self.config["color_enabled"] else f"Extracted {command[1]} to {dest}")
                     else:
                         print(f"{Fore.RED}Error: {result}{Style.RESET_ALL}" if self.config["color_enabled"] else f"Error: {result}")
+                elif cmd == "set" and len(command) > 2 and self.config["variables_enabled"]:
+                    var_name = command[1]
+                    var_value = " ".join(command[2:])
+                    self.variables[var_name] = var_value
+                    if self.config["color_enabled"]:
+                        print(f"{Fore.GREEN}Set {var_name} = {var_value}{Style.RESET_ALL}")
+                    else:
+                        print(f"Set {var_name} = {var_value}")
                 elif cmd == "history":
                     if self.config["color_enabled"]:
                         for i, (ts, cmd) in enumerate(self.history, 1):

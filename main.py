@@ -16,7 +16,7 @@ def main():
         logging.error(f"Configuration error: {str(e)}")
         print(f"Warning: Configuration error - using defaults: {str(e)}")
         config = {
-            "version": "0.13",
+            "version": "0.14",
             "prompt": "FyleCLI> ",
             "max_history": 100,
             "search_recursive": False,
@@ -27,6 +27,7 @@ def main():
             "completion_enabled": True,
             "color_enabled": True,
             "progress_enabled": True,
+            "variables_enabled": True,
             "log_level": "INFO",
             "batch_enabled": True,
             "tags_enabled": True,
