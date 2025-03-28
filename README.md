@@ -1,3 +1,6 @@
+<img src="public/fylebanner.jpg">
+
+# Fyle
 A command-line interface for file system operations with advanced features.
 
 ## Features
