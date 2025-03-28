@@ -37,7 +37,7 @@ def validate_config(config):
     required = {"version", "prompt", "max_history", "search_recursive", "default_sort", 
                 "min_size", "max_size", "aliases", "autocomplete", "log_level", 
                 "batch_enabled", "tags_enabled", "script_dir", "completion_enabled",
-                "color_enabled", "progress_enabled", "variables_enabled"}
+                "color_enabled", "progress_enabled", "variables_enabled", "variables_file"}
     missing = required - set(config.keys())
     if missing:
         raise Exception(f"Missing config keys: {missing}")
@@ -65,6 +65,8 @@ def validate_config(config):
         raise Exception(f"Invalid progress_enabled value: {config['progress_enabled']}")
     if not isinstance(config["variables_enabled"], bool):
         raise Exception(f"Invalid variables_enabled value: {config['variables_enables']}")
+    if not isinstance(config["variables_file"], str):
+        raise Exception(f"Invalid variables_file value: {config['variables_file']}")
 
 def setup_logging(log_file, log_level):
     level_map = {
@@ -154,3 +156,21 @@ def get_file_completions(directory):
     
 def parse_variables(command, variables):
     return [arg.replace(f"${key}", value) for key, value in variables.items() for arg in command if f"${key}" in arg] or command
+
+def load_variables(variables_file):
+    try:
+        if os.path.exists(variables_file):
+            with open(variables_file, 'r') as f:
+                return json.load(f)
+        return {}
+    except Exception as e:
+        logging.error(f"Failed to load variables: {str(e)}")
+        return {}
+    
+def save_variables(variables_file, variables):
+    try:
+        with open(variables_file, 'w') as f:
+            json.dump(variables, f, indent=2)
+        logging.info("Variables saved successfully")
+    except Exception as e:
+        logging.error(f"Failed to save variables: {str(e)}")

@@ -74,6 +74,7 @@ A command-line interface for file system operations with advanced features.
 - `compress <source> <zip_name>`: Compress file or directory to zip
 - `extract <zip_name> [dest_dir]`: Extract zip to directory (default: current dir)
 - `set <var> <value>`: Set a variable for use in scripts (e.g., set dest /path)
+- `hash <name> [algo]`: Compute file hash (algo: sha256/md5, default sha256)
 - `history`: Show command history with timestamps
 - `exec <number>`: Execute command from history by number
 - `script <filename>`: Run commands from script file in script_dir

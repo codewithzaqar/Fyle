@@ -3,7 +3,7 @@ import json
 from colorama import init as colorama_init
 from cli_interface import CLIInterface
 from file_manager import FileManager
-from utils import load_config, validate_config, setup_logging
+from utils import load_config, validate_config, setup_logging, load_variables, save_variables
 
 def main():
     colorama_init()
@@ -16,7 +16,7 @@ def main():
         logging.error(f"Configuration error: {str(e)}")
         print(f"Warning: Configuration error - using defaults: {str(e)}")
         config = {
-            "version": "0.14",
+            "version": "0.15",
             "prompt": "FyleCLI> ",
             "max_history": 100,
             "search_recursive": False,
@@ -32,6 +32,7 @@ def main():
             "batch_enabled": True,
             "tags_enabled": True,
             "script_dir": "scripts",
+            "variables_file": "variables.json",
             "aliases": {
                 "ls": "dir",
                 "rm": "del",
@@ -44,7 +45,9 @@ def main():
 
     file_manager = FileManager()
     cli = CLIInterface(file_manager, config)
+    cli.variables = load_variables(config["variables_file"])  # Load persistent variables
     cli.run()
+    save_variables(config["variables_file"], cli.variables)  # Save variables on exit
 
 if __name__ == "__main__":
     main()      

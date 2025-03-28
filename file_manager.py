@@ -3,6 +3,7 @@ import shutil
 import json
 import logging
 import zipfile
+import hashlib
 from tqdm import tqdm
 from utils import get_file_info, get_permissions, size_to_bytes, set_permissions
 
@@ -352,3 +353,17 @@ class FileManager:
         except Exception as e:
             logging.error(f"Failed to extract {zip_name}: {str(e)}")
             raise Exception(f"Extract failed: {str(e)}")
+        
+    def hash_file(self, filename, algo="sha256"):
+        try:
+            full_path = os.path.join(self.current_dir, filename)
+            hash_obj = hashlib.sha256() if algo.lower() == "sha256" else hashlib.md5()
+            with open(full_path, 'rb') as f:
+                for chunk in iter(lambda: f.read(4096), b""):
+                    hash_obj.update(chunk)
+            hash_value = hash_obj.hexdigest()
+            logging.info(f"Computed {algo} hash for {filename}: {hash_value}")
+            return hash_value
+        except Exception as e:
+            logging.error(f"Failed to hash {filename}: {str(e)}")
+            raise Exception(f"Hash failed: {str(e)}")
